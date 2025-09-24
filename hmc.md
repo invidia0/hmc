@@ -6,12 +6,9 @@ The problem with MCMC is that it can get stuck in local modes, especially in hig
 ## Typical set
 In high-dimensional spaces, the volume of the space increases exponentially with the number of dimensions. As a result, most of the probability mass is concentrated in a thin shell known as the **typical set**. You can think of the typical set as the region where most of the samples from the distribution will lie.
 
-:::note
-**Typical Set Example**
-Consider a probability distribution, the typical set is a fairly high-density area of the likelihood function, but not the highest-density area. For example, in a 2D Gaussian distribution, the typical set is an annulus around the mean, where most of the samples will fall, rather than at the peak of the distribution.
 
-Suppose we have a density on [0, 3], and the height on [1,2] is a quadrillion times higher than the rest. For all intents, we can ignore everything outside of [1,2]. With standard MCMC, we are really unlikely to sample points outside [1,2], and we will get stuck in the high-density region. But in 10 dimensions this is not true anymore. We are focusing on $(\frac{1}{3})^{10}$ of the sapce, which is about 0.000016%. The typical set is now a thin shell around the high-density region, and we are much more likely to sample points in this shell. This is why HMC is so effective in high-dimensional spaces.
-:::
+>[!Note]
+> Consider a probability distribution, the typical set is a fairly high-density area of the likelihood function, but not the highest-density area. For example, in a 2D Gaussian distribution, the typical set is an annulus around the mean, where most of the samples will fall, rather than at the peak of the distribution. Suppose we have a density on [0, 3], and the height on [1,2] is a quadrillion times higher than the rest. For all intents, we can ignore everything outside of [1,2]. With standard MCMC, we are really unlikely to sample points outside [1,2], and we will get stuck in the high-density region. But in 10 dimensions this is not true anymore. We are focusing on $(\frac{1}{3})^{10}$ of the sapce, which is about 0.000016%. The typical set is now a thin shell around the high-density region, and we are much more likely to sample points in this shell. This is why HMC is so effective in high-dimensional spaces.
 
 So the question we are trying to answer is: **how can we distill the geometry of the typical set into information about how to move through it?**
 
@@ -19,16 +16,14 @@ The answer is a *vector field*. A vector field is the assignment of a direction 
 
 But how do we construct such a vector field? This is where Hamiltonian dynamics come in. The key is to twist the gradient vector field into a vector field aligned with the typical set, and hence once capable of generating efficient exploration, is to expand the original probabilistic system with the introduction of **auxiliary momentum parameters**.
 
-```{admonition} Physical Analogy
-:class: tip, dropdown
-Instead of trying to reason about a mode (a peak in the density), a gradient (a slope), and a typical set (a thin shell around the peak), we can think about a planet, a gravitational field and an orbit. The planet is the mode, the gravitational field is the gradient, and the orbit is the typical set.
-
-The probabilistic endeavour of exploring the typical set is becomes a physical endeavor of placing a satellite in a stable orbit around the hypotetical planet. Just placing the satellite in the gravitational field will cause it to fall into the planet. Instead, we need to give it some initial momentum to counteract the gravitational pull and keep it in orbit.
-
-- Too much momentum and the satellite will escape the gravitational pull and fly off into space (exploration of low-density regions).
-- Too little momentum and the satellite will fall into the planet (getting stuck in high-density regions).
-- Just the right amount of momentum and the satellite will stay in a stable orbit around the planet (efficient exploration of the typical set).
-```
+>[!Tip]
+> Instead of trying to reason about a mode (a peak in the density), a gradient (a slope), and a typical set (a thin shell around the peak), we can think about a planet, a gravitational field and an orbit. The planet is the mode, the gravitational field is the gradient, and the orbit is the typical set.
+>
+> The probabilistic endeavour of exploring the typical set is becomes a physical endeavor of placing a satellite in a stable orbit around the hypotetical planet. Just placing the satellite in the gravitational field will cause it to fall into the planet. Instead, we need to give it some initial momentum to counteract the gravitational pull and keep it in orbit.
+>
+> - Too much momentum and the satellite will escape the gravitational pull and fly off into space (exploration of low-density regions).
+> - Too little momentum and the satellite will fall into the planet (getting stuck in high-density regions).
+> - Just the right amount of momentum and the satellite will stay in a stable orbit around the planet (efficient exploration of the typical set).
 
 ## Phase Space and Hamilton's Equations
 We can introduce auxiliary momentum parameters $p_n$ to complement each dimension of our target parameter space,
@@ -48,12 +43,15 @@ $$
 Importantly, it guarantees that **any trajectory exploring the typical set of the phase space distribution will project to trajectories exploring the typical set of the target distribution**.
 
 We can write the joint distribution in terms of a Hamiltonian function $H(q, p)$,
+
 $$
 \pi(q, p) = \exp(-H(q, p)).
 $$
+
 We must note that because the Hamiltonian is independent of the details of any parameterization of the system, we are free to choose any convenient form for the Hamiltonian. Moreover, the value of the Hamiltonian at any point in phase space is called the **energy** at that point.
 
 The Hamiltonian function can be decomposed into two parts, the potential energy $V(q)$ and the kinetic energy $T(p, q)$,
+
 $$
 \begin{aligned}
 \mathcal{H}(q, p) &= -\log \pi(q, p) \\
@@ -69,6 +67,7 @@ Here:
 Because the Hamiltonian captures the geometry of the typical set, we can use it to generate a vector field oriented with the typical set of the canonical distribution and hence the trajectories we are after.
 
 The vector field is given by Hamilton's equations,
+
 $$
 \begin{aligned}
 \dfrac{dq_n}{dt} &= +\dfrac{\partial \mathcal{H}}{\partial p_n} = +\dfrac{\partial K}{\partial p_n}, \\
@@ -81,15 +80,15 @@ Here we can note that $\partial V/\partial q_n$ is just the gradient of the log 
 Following the Hamiltonian vector field for some time $t$, generates trajectories that rapidly move through phase space while being constrained to the typical set. Projecting these trajectories back down onto the target parameter space finally yields the efficient exploration of the target typical set for which we are searching.
 
 ## How HMC works
-```{note}
-For reference, I followed this [blog post](https://colindcarroll.com/blog/hmc_from_scratch.html).
-```
+>[!Note]
+> For reference, I followed this [blog post](https://colindcarroll.com/blog/hmc_from_scratch.html).
+
 The algorithm works as follows:
 1. Concatenate all parameters into a single position variable $\mathbf{q}$. The probability density function we are trying to sample from is $\pi(\mathbf{q})$.
 2. Add a *momentum* variable $\mathbf{p}$ of the same dimension as $\mathbf{q}$ and define the joint probability density function
-    $$
+    \[
     \pi(\mathbf{q}, \mathbf{p}) = \pi(\mathbf{q}) \pi(\mathbf{p}\mid \mathbf{q}),
-    $$
+    \]
     where $\pi(\mathbf{p}\mid \mathbf{q})$ is a conditional distribution over the momentum variable given the position variable that we get to choose. A common choice is to use a Gaussian distribution with zero mean and covariance matrix $M$,
     $$
     \pi(\mathbf{p}\mid \mathbf{q}) = \mathcal{N}(\mathbf{p}\mid 0, M),
