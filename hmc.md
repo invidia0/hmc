@@ -6,12 +6,12 @@ The problem with MCMC is that it can get stuck in local modes, especially in hig
 ## Typical set
 In high-dimensional spaces, the volume of the space increases exponentially with the number of dimensions. As a result, most of the probability mass is concentrated in a thin shell known as the **typical set**. You can think of the typical set as the region where most of the samples from the distribution will lie.
 
-```{admonition} Typical Set Example
-:class: tip, dropdown
+:::note
+**Typical Set Example**
 Consider a probability distribution, the typical set is a fairly high-density area of the likelihood function, but not the highest-density area. For example, in a 2D Gaussian distribution, the typical set is an annulus around the mean, where most of the samples will fall, rather than at the peak of the distribution.
 
 Suppose we have a density on [0, 3], and the height on [1,2] is a quadrillion times higher than the rest. For all intents, we can ignore everything outside of [1,2]. With standard MCMC, we are really unlikely to sample points outside [1,2], and we will get stuck in the high-density region. But in 10 dimensions this is not true anymore. We are focusing on $(\frac{1}{3})^{10}$ of the sapce, which is about 0.000016%. The typical set is now a thin shell around the high-density region, and we are much more likely to sample points in this shell. This is why HMC is so effective in high-dimensional spaces.
-```
+:::
 
 So the question we are trying to answer is: **how can we distill the geometry of the typical set into information about how to move through it?**
 
