@@ -162,21 +162,21 @@ In practice, we cannot solve Hamilton's equations analytically, so we need to us
 The leapfrog integrator works as follows:
 1. Half-step update of momentum:
    
-    $$
-    \mathbf{p}\left(t + \dfrac{\epsilon}{2}\right) = \mathbf{p}(t) - \dfrac{\epsilon}{2} \dfrac{\partial V}{\partial \mathbf{q}}\bigg|_{\mathbf{q}(t)}
-    $$
+$$
+\mathbf{p}\left(t + \dfrac{\epsilon}{2}\right) = \mathbf{p}(t) - \dfrac{\epsilon}{2} \dfrac{\partial V}{\partial \mathbf{q}}\bigg|_{\mathbf{q}(t)}
+$$
 
 2. Full-step update of position:
    
-    $$
-    \mathbf{q}(t + \epsilon) = \mathbf{q}(t) + \epsilon \mathbf{p}\left(t + \dfrac{\epsilon}{2}\right)
-    $$
+$$
+\mathbf{q}(t + \epsilon) = \mathbf{q}(t) + \epsilon \mathbf{p}\left(t + \dfrac{\epsilon}{2}\right)
+$$
 
 3. Half-step update of momentum:
    
-    $$
-    \mathbf{p}(t + \epsilon) = \mathbf{p}\left(t + \dfrac{\epsilon}{2}\right) - \dfrac{\epsilon}{2} \dfrac{\partial V}{\partial \mathbf{q}}\bigg|_{\mathbf{q}(t + \epsilon)}
-    $$
+$$
+\mathbf{p}(t + \epsilon) = \mathbf{p}\left(t + \dfrac{\epsilon}{2}\right) - \dfrac{\epsilon}{2} \dfrac{\partial V}{\partial \mathbf{q}}\bigg|_{\mathbf{q}(t + \epsilon)}
+$$
 
 Here, $\epsilon$ is the step size.
 We repeat these steps $L$ times to simulate the trajectory for a total time of $T = L \epsilon$.
