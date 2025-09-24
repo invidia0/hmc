@@ -86,15 +86,20 @@ Following the Hamiltonian vector field for some time $t$, generates trajectories
 The algorithm works as follows:
 1. Concatenate all parameters into a single position variable $\mathbf{q}$. The probability density function we are trying to sample from is $\pi(\mathbf{q})$.
 2. Add a *momentum* variable $\mathbf{p}$ of the same dimension as $\mathbf{q}$ and define the joint probability density function
-    \[
+
+    $$
     \pi(\mathbf{q}, \mathbf{p}) = \pi(\mathbf{q}) \pi(\mathbf{p}\mid \mathbf{q}),
-    \]
+    $$
+
     where $\pi(\mathbf{p}\mid \mathbf{q})$ is a conditional distribution over the momentum variable given the position variable that we get to choose. A common choice is to use a Gaussian distribution with zero mean and covariance matrix $M$,
+
     $$
     \pi(\mathbf{p}\mid \mathbf{q}) = \mathcal{N}(\mathbf{p}\mid 0, M),
     $$
+
     where $M$ is called the *mass matrix* and usually chosen to be $M = I$ (the identity matrix).
 3. Define the Hamiltonian function
+
     $$
     \begin{aligned}
     \mathcal{H}(\mathbf{q}, \mathbf{p}) &= -\log \pi(\mathbf{q}, \mathbf{p}) \\
@@ -102,32 +107,42 @@ The algorithm works as follows:
     &= K(\mathbf{p}, \mathbf{q}) + V(\mathbf{q}).
     \end{aligned}
     $$
+
     Here, $V(\mathbf{q}) = -\log \pi(\mathbf{q})$ is the *potential energy* and $K(\mathbf{p}, \mathbf{q}) = -\log \pi(\mathbf{p}\mid \mathbf{q})$ is the *kinetic energy*.
 4. Given the current state $(\mathbf{q}, \mathbf{p})$, evolve the system $(\mathbf{q}, \mathbf{p})$ according to Hamilton's equations for some time $t$ to get a new state $(\mathbf{q}^*, \mathbf{p}^*)$.
+   
     $$
     \begin{aligned}
     \dfrac{d\mathbf{q}}{dt} &= +\dfrac{\partial \mathcal{H}}{\partial \mathbf{p}} = +\dfrac{\partial K}{\partial \mathbf{p}}, \\
     \dfrac{d\mathbf{p}}{dt} &= -\dfrac{\partial \mathcal{H}}{\partial \mathbf{q}} = -\dfrac{\partial K}{\partial \mathbf{q}} - \dfrac{\partial V}{\partial \mathbf{q}}.
     \end{aligned}
     $$
+
     Here, $\partial V/\partial \mathbf{p} = 0$ because $V$ does not depend on $\mathbf{p}$.
 
 We can choose the **kinetic energy** to be a Gaussian, obtaining
+
 $$
 K(\mathbf{p}, \mathbf{q}) = \dfrac{1}{2} \mathbf{p}^T M^{-1} \mathbf{p} + \log |M| + \text{constant},
 $$
+
 and with $M = I$ (the identity matrix), we have
+
 $$
 K(\mathbf{p}, \mathbf{q}) = \dfrac{1}{2} \mathbf{p}^T \mathbf{p} + \text{constant}.
 $$
+
 This gives us the following equations:
+
 $$
 \begin{aligned}
 \dfrac{\partial K}{\partial \mathbf{p}} &= \mathbf{p}, \\
 \dfrac{\partial K}{\partial \mathbf{q}} &= 0, \\
 \end{aligned}
 $$
+
 And the Hamilton's equations simplify to
+
 $$
 \begin{aligned}
 \dfrac{d\mathbf{q}}{dt} &= \mathbf{p}, \\
@@ -146,25 +161,33 @@ In practice, we cannot solve Hamilton's equations analytically, so we need to us
 ### Leapfrog Integrator
 The leapfrog integrator works as follows:
 1. Half-step update of momentum:
+   
     $$
     \mathbf{p}\left(t + \dfrac{\epsilon}{2}\right) = \mathbf{p}(t) - \dfrac{\epsilon}{2} \dfrac{\partial V}{\partial \mathbf{q}}\bigg|_{\mathbf{q}(t)}
     $$
+
 2. Full-step update of position:
+   
     $$
     \mathbf{q}(t + \epsilon) = \mathbf{q}(t) + \epsilon \mathbf{p}\left(t + \dfrac{\epsilon}{2}\right)
     $$
+
 3. Half-step update of momentum:
+   
     $$
     \mathbf{p}(t + \epsilon) = \mathbf{p}\left(t + \dfrac{\epsilon}{2}\right) - \dfrac{\epsilon}{2} \dfrac{\partial V}{\partial \mathbf{q}}\bigg|_{\mathbf{q}(t + \epsilon)}
     $$
+
 Here, $\epsilon$ is the step size.
 We repeat these steps $L$ times to simulate the trajectory for a total time of $T = L \epsilon$.
 
 ### Metropolis Acceptance Step
 After simulating the trajectory, we get a new state $(\mathbf{q}^*, \mathbf{p}^*)$. We then compute the acceptance probability
+
 $$
 \alpha = \min\left(1, \exp\left(-\mathcal{H}(\mathbf{q}^*, \mathbf{p}^*) + \mathcal{H}(\mathbf{q}, \mathbf{p})\right)\right).
 $$
+
 We accept the new state with probability $\alpha$. If we reject, we stay at the current state. This is necessary because the leapfrog integrator is not exact and introduces some error in the Hamiltonian. The Metropolis step ensures that the Markov chain has the correct stationary distribution.
 
 ## Symplectic Integrator Error Correction
@@ -186,7 +209,7 @@ $$
 yielding the MH acceptance rule
 
 $$
-\alpha = \min\bigl(1, e^{-\mathcal{H}(q^*,p^*) + \mathcal{H}(q,p)}\bigr).
+\alpha = \min\big(1, e^{-\mathcal{H}(q^*,p^*) + \mathcal{H}(q,p)}\big).
 $$
 
 However, this naïve scheme often proposes states with very low acceptance, producing high rejection rates. A better approach is to sample along an entire trajectory \$\mathfrak{t} = {(q\_0,p\_0), \ldots, (q\_L,p\_L)}\$ and then select a point with probability proportional to its Boltzmann weight:
